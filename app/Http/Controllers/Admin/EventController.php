@@ -45,7 +45,7 @@ public function store(Request $request)
         if ($request->hasFile('gambar')) {
             $imageName = time().'.'.$request->gambar->extension();
             $request->gambar->move(public_path('images/events'), $imageName);
-            $validatedData['gambar'] = $imageName;
+            $validatedData['gambar'] = 'events/' . $imageName;
         }
 
         $validatedData['user_id'] = auth()->user()->id ?? null;
@@ -98,7 +98,7 @@ public function update(Request $request, string $id)
             if ($request->hasFile('gambar')) {
                 $imageName = time().'.'.$request->gambar->extension();
                 $request->gambar->move(public_path('images/events'), $imageName);
-                $validatedData['gambar'] = $imageName;
+                $validatedData['gambar'] = 'events/' . $imageName;
             }
 
             $event->update($validatedData);
