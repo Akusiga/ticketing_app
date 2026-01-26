@@ -13,11 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
   {
     $user = Auth::user() ?? \App\Models\User::first();
@@ -64,14 +59,13 @@ class OrderController extends Controller
       $order = DB::transaction(function () use ($data, $user) {
         \Log::info('Starting transaction');
         $total = 0;
-        // Get all tickets at once to lock them together
+        // Get all tickets (without lock for now to avoid deadlock issues)
         $tiketIds = array_column($data['items'], 'tiket_id');
-        $tikets = Tiket::lockForUpdate()
-          ->whereIn('id', $tiketIds)
+        $tikets = Tiket::whereIn('id', $tiketIds)
           ->get()
           ->keyBy('id');
 
-        \Log::info('Tickets locked', ['count' => count($tikets)]);
+        \Log::info('Tickets fetched', ['count' => count($tikets)]);
 
         // validate stock and calculate total
         foreach ($data['items'] as $it) {
@@ -80,7 +74,7 @@ class OrderController extends Controller
           }
           $t = $tikets[$it['tiket_id']];
           if ($t->stok < $it['jumlah']) {
-            throw new \Exception("Stok tidak cukup untuk tipe: {$t->tipe}");
+            throw new \Exception("Stok tidak cukup untuk tipe: {$t->tipe}. Stok tersedia: {$t->stok}");
           }
           $total += ($t->harga ?? 0) * $it['jumlah'];
         }
@@ -109,12 +103,14 @@ class OrderController extends Controller
           // reduce stock
           $t->stok = max(0, $t->stok - $it['jumlah']);
           $t->save();
+          \Log::info('Ticket stock updated', ['tiket_id' => $t->id, 'new_stock' => $t->stok]);
         }
 
         \Log::info('Order completed successfully', ['order_id' => $order->id]);
         return $order;
       });
 
+      \Log::info('Returning success response', ['order_id' => $order->id]);
       return response()->json([
         'ok' => true, 
         'order_id' => $order->id, 
@@ -124,7 +120,5 @@ class OrderController extends Controller
       \Log::error('Order processing error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
       return response()->json(['ok' => false, 'message' => $e->getMessage()], 422);
     }
-  }
-  }
   }
 }

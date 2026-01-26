@@ -15,12 +15,7 @@
       <div class="lg:col-span-2">
         <div class="card bg-base-100 shadow">
           <figure>
-            <img src="{{ $event->gambar
-      ? (str_starts_with($event->gambar, 'events/')
-          ? asset('images/' . $event->gambar)
-          : asset('storage/' . $event->gambar))
-      : 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'
-  }}" alt="{{ $event->judul }}" class="w-full h-96 object-cover" />
+            <img src="{{ $event->gambar ? asset('images/' . $event->gambar) : 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp' }}" alt="{{ $event->judul }}" class="w-full h-96 object-cover" onerror="this.src='https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'" />
           </figure>
           <div class="card-body">
             <div class="flex justify-between items-start gap-4">
@@ -49,9 +44,8 @@
               @forelse($event->tikets as $tiket)
               <div class="card card-side shadow-sm p-4 items-center">
                 <div class="flex-1">
-                  <h4 class="font-bold">{{ $tiket->tipe }}</h4>
+                  <h4 class="font-bold">{{ ucfirst($tiket->tipe) }}</h4>
                   <p class="text-sm text-gray-500">Stok: <span id="stock-{{ $tiket->id }}">{{ $tiket->stok }}</span></p>
-                  <p class="text-sm mt-2">{{ $tiket->keterangan ?? '' }}</p>
                 </div>
 
                 <div class="w-44 text-right">
@@ -147,7 +141,7 @@
             id: {{ $tiket->id }},
             price: {{ $tiket->harga ?? 0 }},
             stock: {{ $tiket->stok }},
-            tipe: "{{ e($tiket->tipe) }}"
+            tipe: "{{ e($tiket->tipeTicket->nama ?? '-') }}"
           },
         @endforeach
       };
@@ -255,11 +249,6 @@
         modal.classList.add('modal-open');
       }
     }
-
-    // init
-    updateSummary();
-    }) ();
-
     document.getElementById('confirmCheckout').addEventListener('click', async () => {
       const btn = document.getElementById('confirmCheckout');
       btn.setAttribute('disabled', 'disabled');
@@ -275,14 +264,11 @@
       if (items.length === 0) {
         alert('Tidak ada tiket dipilih');
         btn.removeAttribute('disabled');
-        btn.textContent = 'Konfirmasi';
+        btn.textContent = 'Konfirmasi (placeholder)';
         return;
       }
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
         const res = await fetch("{{ route('orders.store') }}", {
           method: 'POST',
           headers: {
@@ -290,29 +276,27 @@
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
           },
-          body: JSON.stringify({ event_id: {{ $event->id }}, items }),
-          signal: controller.signal
+          body: JSON.stringify({ event_id: {{ $event->id }}, items })
         });
 
-        clearTimeout(timeoutId);
-        const data = await res.json();
-        
-        if (!res.ok || !data.ok) {
-          throw new Error(data.message || 'Gagal membuat pesanan');
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || 'Gagal membuat pesanan');
         }
 
+        const data = await res.json();
         // redirect to orders list
         window.location.href = data.redirect || '{{ route('orders.index') }}';
       } catch (err) {
-        if (err.name === 'AbortError') {
-          alert('Request timeout - server tidak merespons. Coba lagi.');
-        } else {
-          console.error('Error:', err);
-          alert('Terjadi kesalahan: ' + err.message);
-        }
+        console.log(err);
+        alert('Terjadi kesalahan saat memproses pesanan: ' + err.message);
         btn.removeAttribute('disabled');
-        btn.textContent = 'Konfirmasi';
+        btn.textContent = 'Konfirmasi (placeholder)';
       }
     });
+
+    // init
+    updateSummary();
+    }) ();
   </script>
 </x-layouts.app>

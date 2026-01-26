@@ -129,7 +129,7 @@
                             <tr>
                                 <th>{{ $index + 1 }}</th>
                                 <td>{{ $ticket->tipe }}</td>
-                                <td>{{ $ticket->harga }}</td>
+                                <td>Rp {{ number_format($ticket->harga, 0, ',', '.') }}</td>
                                 <td>{{ $ticket->stok }}</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary mr-2" onclick="openEditModal(this)"
