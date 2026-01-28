@@ -55,7 +55,7 @@
                             <span class="label-text font-semibold">Lokasi</span>
                         </label>
                         <input type="text" name="lokasi" placeholder="Contoh: Stadion Utama"
-                            class="input input-bordered w-full" value="{{ $event->lokasi }}" disabled required />
+                            class="input input-bordered w-full" value="@if(is_object($event->lokasi)){{ $event->lokasi->nama_lokasi }}@else{{ \App\Models\Lokasi::find($event->lokasi)?->nama_lokasi ?? '-' }}@endif" disabled required />
                     </div>
 
                     <!-- Kategori -->
@@ -93,15 +93,11 @@
                             <span class="label-text font-semibold">Preview Gambar</span>
                         </label>
                         <br>
-                        <div class="avatar max-w-sm">
-                            <div class="w-full rounded-lg">
-                                @if ($event->gambar)
-                                    <img id="previewImg" src="{{ asset('images/events/' . $event->gambar) }}"
-                                        alt="Preview">
-                                @else
-                                    <img id="previewImg" src="" alt="Preview">
-                                @endif
-                            </div>
+                        <div class="w-64">
+                            @if ($event->gambar)
+                                <img src="{{ asset('images/events/' . $event->gambar) }}"
+                                    alt="Preview" class="rounded-lg w-full h-auto">
+                            @endif
                         </div>
                     </div>
                 </form>

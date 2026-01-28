@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Kategori;
+use App\Models\Lokasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -14,7 +16,7 @@ class EventController extends Controller
      */
 public function index()
 {
-	$events = Event::all();
+	$events = Event::with('kategori', 'lokasi')->get();
 	return view('admin.event.index', compact('events'));
 }
 
@@ -24,7 +26,8 @@ public function index()
 public function create()
     {
         $categories = Kategori::all();
-        return view('admin.event.create', compact('categories'));
+        $lokasis = Lokasi::all();
+        return view('admin.event.create', compact('categories', 'lokasis'));
     }
 
     /**
@@ -36,7 +39,7 @@ public function store(Request $request)
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'tanggal_waktu' => 'required|date',
-            'lokasi' => 'required|string|max:255',
+            'lokasi' => 'required|exists:lokasis,id',
             'kategori_id' => 'required|exists:kategoris,id',
             'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -45,10 +48,10 @@ public function store(Request $request)
         if ($request->hasFile('gambar')) {
             $imageName = time().'.'.$request->gambar->extension();
             $request->gambar->move(public_path('images/events'), $imageName);
-            $validatedData['gambar'] = 'events/' . $imageName;
+            $validatedData['gambar'] = $imageName;
         }
 
-        $validatedData['user_id'] = auth()->user()->id ?? null;
+        $validatedData['user_id'] = Auth::id();
 
         Event::create($validatedData);
 
@@ -74,7 +77,8 @@ public function edit(string $id)
     {
         $event = Event::findOrFail($id);
         $categories = Kategori::all();
-        return view('admin.event.edit', compact('event', 'categories'));
+        $lokasis = Lokasi::all();
+        return view('admin.event.edit', compact('event', 'categories', 'lokasis'));
     }
 
     /**
@@ -89,7 +93,7 @@ public function update(Request $request, string $id)
                 'judul' => 'required|string|max:255',
                 'deskripsi' => 'required|string',
                 'tanggal_waktu' => 'required|date',
-                'lokasi' => 'required|string|max:255',
+                'lokasi' => 'required|exists:lokasis,id',
                 'kategori_id' => 'required|exists:kategoris,id',
                 'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
@@ -98,7 +102,7 @@ public function update(Request $request, string $id)
             if ($request->hasFile('gambar')) {
                 $imageName = time().'.'.$request->gambar->extension();
                 $request->gambar->move(public_path('images/events'), $imageName);
-                $validatedData['gambar'] = 'events/' . $imageName;
+                $validatedData['gambar'] = $imageName;
             }
 
             $event->update($validatedData);

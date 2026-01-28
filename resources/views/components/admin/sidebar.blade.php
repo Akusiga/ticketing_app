@@ -40,6 +40,17 @@
 	</a>
 </li>
 
+            <!-- Lokasi item -->
+<li class="{{ request()->routeIs('admin.lokasi.*') ? 'bg-gray-200 rounded-lg' : '' }}">
+	<a href="{{ route('admin.lokasi.index') }}" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Lokasi">
+		<!-- icon Lokasi -->
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+			<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3s3 1.343 3 3s-1.343 3-3 3z" />
+		</svg>
+		<span class="is-drawer-close:hidden">Manajemen Lokasi</span>
+	</a>
+</li>
+
             <!-- History item -->
 <li class="{{ request()->routeIs('admin.histories.*') ? 'bg-gray-200 rounded-lg' : '' }}">
 	<a href="{{ route('admin.histories.index') }}" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="History">

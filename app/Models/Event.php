@@ -33,6 +33,11 @@ class Event extends Model
         return $this->belongsTo(Kategori::class);
     }
 
+    public function lokasi()
+    {
+        return $this->belongsTo(Lokasi::class, 'lokasi');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

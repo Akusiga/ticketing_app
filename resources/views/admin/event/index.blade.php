@@ -37,7 +37,13 @@
                         <td>{{ $event->judul }}</td>
                         <td>{{ $event->kategori->nama }}</td>
                         <td>{{ $event->tanggal_waktu->format('d M Y') }}</td>
-                        <td>{{ $event->lokasi }}</td>
+                        <td>
+                            @if(is_object($event->lokasi))
+                                {{ $event->lokasi->nama_lokasi }}
+                            @else
+                                {{ $event->lokasi ? \App\Models\Lokasi::find($event->lokasi)->nama_lokasi ?? '-' : '-' }}
+                            @endif
+                        </td>
                         <td>
                             <a href="{{ route('admin.events.show', $event->id) }}" class="btn btn-sm btn-info mr-2">Detail</a>
                             <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-sm btn-primary mr-2">Edit</a>

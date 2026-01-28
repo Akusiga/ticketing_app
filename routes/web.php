@@ -11,6 +11,7 @@ use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\User\EventController as UserEventController;
 use App\Http\Controllers\User\OrderController;
+use App\Http\Controllers\LokasiController;
 
 
 
@@ -40,6 +41,9 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
 
         // Tiket Management 
         Route::resource('tickets', TiketController::class);
+
+        // Lokasi Management
+        Route::resource('lokasi', LokasiController::class);
 
         // Histories
         Route::get('/histories', [HistoriesController::class, 'index'])->name('histories.index');
