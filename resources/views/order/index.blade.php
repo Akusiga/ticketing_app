@@ -8,13 +8,15 @@
       @forelse($orders as $order)
         <article class="card lg:card-side bg-base-100 shadow-md overflow-hidden">
           <figure class="lg:w-48">
-            <img
-              src="{{ $order->event?->gambar
-                ? (str_starts_with($order->event->gambar, 'events/')
+            @php
+              $imagePath = $order->event?->gambar
+                ? (str_contains($order->event->gambar, '/')
                     ? asset('images/' . $order->event->gambar)
-                    : asset('storage/' . $order->event->gambar))
-                : 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'
-              }}"
+                    : asset('images/events/' . $order->event->gambar))
+                : 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp';
+            @endphp
+            <img
+              src="{{ $imagePath }}"
               alt="{{ $order->event?->judul ?? 'Event' }}" class="w-full h-full object-cover" />
           </figure>
 

@@ -12,11 +12,20 @@ $formattedDate = $date
 $imageUrl = $image
 ? (filter_var($image, FILTER_VALIDATE_URL)
 ? $image
-: (str_starts_with($image, 'events/') 
-    ? asset('images/' . $image)  // For images uploaded via admin panel at public/images/events/
-    : asset('storage/' . $image) // For images in storage/app/public/
+: (str_contains($image, '/') 
+    ? asset('images/' . $image)  // For images with path like 'events/filename.jpg'
+    : asset('images/events/' . $image) // For images with just filename
   ))
 : 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp';
+
+// Get lokasi name from ID or object
+$lokasiName = $location;
+if (is_numeric($location)) {
+    $lokasi = \App\Models\Lokasi::find($location);
+    $lokasiName = $lokasi?->nama_lokasi ?? '-';
+} elseif (is_object($location)) {
+    $lokasiName = $location->nama_lokasi ?? '-';
+}
 
 @endphp
 
@@ -40,7 +49,7 @@ $imageUrl = $image
             </p>
 
             <p class="text-sm">
-                📍 {{ $location }}
+                📍 {{ $lokasiName }}
             </p>
 
             <p class="font-bold text-lg mt-2">
